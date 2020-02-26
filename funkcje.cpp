@@ -179,7 +179,7 @@ void writePointShapeFile(const char* name, const char* layer, const char* field_
 		printf("%s driver not available.\n", pszDriverName);
 		exit(1);
 	}
-
+	
 	GDALDataset* poDS;
 
 	poDS = poDriver->Create(name, 0, 0, 0, GDT_Unknown, NULL);
@@ -208,9 +208,8 @@ void writePointShapeFile(const char* name, const char* layer, const char* field_
 		exit(1);
 	}
 	char szName[33];
-
-	while (!feof(stdin)
-		&& fscanf_s(stdin, "%lf,%lf,%32s", &x, &y, szName) == 3)
+	int i = 0;
+	while (!feof(stdin) && i < 2)
 	{
 		OGRFeature* poFeature;
 
@@ -231,6 +230,7 @@ void writePointShapeFile(const char* name, const char* layer, const char* field_
 		}
 
 		OGRFeature::DestroyFeature(poFeature);
+		i++;
 	}
 
 	GDALClose(poDS);
