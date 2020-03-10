@@ -1,5 +1,6 @@
 #include "funkcje.h"
 
+//funkcja rozdzielaj¹ca wszystkie typy do odczytu
 std::vector<std::vector<double>> read(const  char* name, const  char* layer, const char* field)
 {
 	std::vector<std::vector<double>> result;
@@ -78,6 +79,7 @@ std::vector<std::vector<double>> read(const  char* name, const  char* layer, con
 
 
 
+//funkcja odczytuj¹ca punkty
 std::vector<double> readPointShapeFile(OGRGeometry* poGeometry, OGRFeature* poFeature)
 {
 	std::vector<double> punkt;
@@ -100,7 +102,7 @@ std::vector<double> readPointShapeFile(OGRGeometry* poGeometry, OGRFeature* poFe
 
 
 
-
+//funkcja odczytuj¹ca multipunkty
 std::vector<double> readMultiPointShapeFile(OGRGeometry* poGeometry, OGRFeature* poFeature)
 {
 	std::vector<double> punkt;
@@ -124,150 +126,8 @@ std::vector<double> readMultiPointShapeFile(OGRGeometry* poGeometry, OGRFeature*
 
 
 
-
-void writePointShapeFile(const char* name, const char* layer, const char* field, std::vector<std::vector<double>> points)
-{
-	const char* pszDriverName = "ESRI Shapefile";
-	GDALDriver* poDriver;
-
-	GDALAllRegister();
-
-	poDriver = GetGDALDriverManager()->GetDriverByName(pszDriverName);
-	if (poDriver == NULL)
-	{
-		printf("%s driver not available.\n", pszDriverName);
-		exit(1);
-	}
-
-	GDALDataset* poDS;
-
-	poDS = poDriver->Create(name, 0, 0, 0, GDT_Unknown, NULL);
-	if (poDS == NULL)
-	{
-		printf("Creation of output file failed.\n");
-		exit(1);
-	}
-
-	OGRLayer* poLayer;
-
-	poLayer = poDS->CreateLayer(layer, NULL, wkbPoint, NULL);
-	if (poLayer == NULL)
-	{
-		printf("Layer creation failed.\n");
-		exit(1);
-	}
-
-	OGRFieldDefn oField(field, OFTInteger64);
-
-	oField.SetWidth(10);
-
-	if (poLayer->CreateField(&oField) != OGRERR_NONE)
-	{
-		printf("Creating Name field failed.\n");
-		exit(1);
-	}
-	char szName[11];
-	int i = 0;
-	while (!feof(stdin) && i < points.size())
-	{
-		OGRFeature* poFeature;
-
-		poFeature = OGRFeature::CreateFeature(poLayer->GetLayerDefn());
-		poFeature->SetField(field, szName);
-
-		OGRPoint pt;
-
-		pt.setX(points.at(i).at(0));
-		pt.setY(points.at(i).at(1));
-
-		poFeature->SetGeometry(&pt);
-
-		if (poLayer->CreateFeature(poFeature) != OGRERR_NONE)
-		{
-			printf("Failed to create feature in shapefile.\n");
-			exit(1);
-		}
-
-		OGRFeature::DestroyFeature(poFeature);
-		i++;
-	}
-
-	GDALClose(poDS);
-}
-
-void writeMultiPointShapeFile(const char* name, const char* layer, const char* field, std::vector<std::vector<double>> points)
-{
-	const char* pszDriverName = "ESRI Shapefile";
-	GDALDriver* poDriver;
-
-	GDALAllRegister();
-
-	poDriver = GetGDALDriverManager()->GetDriverByName(pszDriverName);
-	if (poDriver == NULL)
-	{
-		printf("%s driver not available.\n", pszDriverName);
-		exit(1);
-	}
-
-	GDALDataset* poDS;
-
-	poDS = poDriver->Create(name, 0, 0, 0, GDT_Unknown, NULL);
-	if (poDS == NULL)
-	{
-		printf("Creation of output file failed.\n");
-		exit(1);
-	}
-
-	OGRLayer* poLayer;
-
-	poLayer = poDS->CreateLayer(layer, NULL, wkbMultiPoint, NULL);
-	if (poLayer == NULL)
-	{
-		printf("Layer creation failed.\n");
-		exit(1);
-	}
-
-	OGRFieldDefn oField(field, OFTInteger64);
-
-	oField.SetWidth(10);
-
-	if (poLayer->CreateField(&oField) != OGRERR_NONE)
-	{
-		printf("Creating Name field failed.\n");
-		exit(1);
-	}
-	char szName[11];
-	int i = 0;
-	while (!feof(stdin) && i < points.size()) //tu zrobiæ fora
-	{
-		OGRFeature* poFeature;
-
-		poFeature = OGRFeature::CreateFeature(poLayer->GetLayerDefn());
-		poFeature->SetField(field, szName);
-
-		OGRMultiPoint multi_pt;
-		OGRPoint pt;
-
-		pt.setX(points.at(i).at(0));
-		pt.setY(points.at(i).at(1));
-
-		multi_pt.addGeometry(&pt);
-
-		poFeature->SetGeometry(&multi_pt);
-
-		if (poLayer->CreateFeature(poFeature) != OGRERR_NONE)
-		{
-			printf("Failed to create feature in shapefile.\n");
-			exit(1);
-		}
-		OGRFeature::DestroyFeature(poFeature);
-		i++;
-	}
-	GDALClose(poDS);
-}
-
-//pocz¹tek funckji która mia³aby zamieniæ dwie powy¿sze procedury
-void writePointOrMultiPointShapeFile(const char* name, const char* layer, const char* field, std::vector<std::vector<double>> points, bool check) {
+//funkcja rozdzialaj¹ca wszystkie typy do zapisu
+void write(const char* name, const char* layer, const char* field, std::vector<std::vector<double>> points, bool check) {
 	const char* pszDriverName = "ESRI Shapefile";
 	GDALDriver* poDriver;
 	GDALAllRegister();
@@ -348,6 +208,153 @@ void writePointOrMultiPointShapeFile(const char* name, const char* layer, const 
 			OGRFeature::DestroyFeature(poFeature);
 			i++;
 		}
+	}
+	GDALClose(poDS);
+}
+
+
+
+//funkcja zapisuj¹ca punkty
+void writePointShapeFile(const char* name, const char* layer, const char* field, std::vector<std::vector<double>> points)
+{
+	const char* pszDriverName = "ESRI Shapefile";
+	GDALDriver* poDriver;
+
+	GDALAllRegister();
+
+	poDriver = GetGDALDriverManager()->GetDriverByName(pszDriverName);
+	if (poDriver == NULL)
+	{
+		printf("%s driver not available.\n", pszDriverName);
+		exit(1);
+	}
+
+	GDALDataset* poDS;
+
+	poDS = poDriver->Create(name, 0, 0, 0, GDT_Unknown, NULL);
+	if (poDS == NULL)
+	{
+		printf("Creation of output file failed.\n");
+		exit(1);
+	}
+
+	OGRLayer* poLayer;
+
+	poLayer = poDS->CreateLayer(layer, NULL, wkbPoint, NULL);
+	if (poLayer == NULL)
+	{
+		printf("Layer creation failed.\n");
+		exit(1);
+	}
+
+	OGRFieldDefn oField(field, OFTInteger64);
+
+	oField.SetWidth(10);
+
+	if (poLayer->CreateField(&oField) != OGRERR_NONE)
+	{
+		printf("Creating Name field failed.\n");
+		exit(1);
+	}
+	char szName[11];
+	int i = 0;
+	while (!feof(stdin) && i < points.size())
+	{
+		OGRFeature* poFeature;
+
+		poFeature = OGRFeature::CreateFeature(poLayer->GetLayerDefn());
+		poFeature->SetField(field, szName);
+
+		OGRPoint pt;
+
+		pt.setX(points.at(i).at(0));
+		pt.setY(points.at(i).at(1));
+
+		poFeature->SetGeometry(&pt);
+
+		if (poLayer->CreateFeature(poFeature) != OGRERR_NONE)
+		{
+			printf("Failed to create feature in shapefile.\n");
+			exit(1);
+		}
+
+		OGRFeature::DestroyFeature(poFeature);
+		i++;
+	}
+
+	GDALClose(poDS);
+}
+
+
+
+//funkcja zapisuj¹ca multipunkty
+void writeMultiPointShapeFile(const char* name, const char* layer, const char* field, std::vector<std::vector<double>> points)
+{
+	const char* pszDriverName = "ESRI Shapefile";
+	GDALDriver* poDriver;
+
+	GDALAllRegister();
+
+	poDriver = GetGDALDriverManager()->GetDriverByName(pszDriverName);
+	if (poDriver == NULL)
+	{
+		printf("%s driver not available.\n", pszDriverName);
+		exit(1);
+	}
+
+	GDALDataset* poDS;
+
+	poDS = poDriver->Create(name, 0, 0, 0, GDT_Unknown, NULL);
+	if (poDS == NULL)
+	{
+		printf("Creation of output file failed.\n");
+		exit(1);
+	}
+
+	OGRLayer* poLayer;
+
+	poLayer = poDS->CreateLayer(layer, NULL, wkbMultiPoint, NULL);
+	if (poLayer == NULL)
+	{
+		printf("Layer creation failed.\n");
+		exit(1);
+	}
+
+	OGRFieldDefn oField(field, OFTInteger64);
+
+	oField.SetWidth(10);
+
+	if (poLayer->CreateField(&oField) != OGRERR_NONE)
+	{
+		printf("Creating Name field failed.\n");
+		exit(1);
+	}
+	char szName[11];
+	int i = 0;
+	while (!feof(stdin) && i < points.size()) //tu zrobiæ fora
+	{
+		OGRFeature* poFeature;
+
+		poFeature = OGRFeature::CreateFeature(poLayer->GetLayerDefn());
+		poFeature->SetField(field, szName);
+
+		OGRMultiPoint multi_pt;
+		OGRPoint pt;
+
+		pt.setX(points.at(i).at(0));
+		pt.setY(points.at(i).at(1));
+
+		multi_pt.addGeometry(&pt);
+
+		poFeature->SetGeometry(&multi_pt);
+
+		if (poLayer->CreateFeature(poFeature) != OGRERR_NONE)
+		{
+			printf("Failed to create feature in shapefile.\n");
+			exit(1);
+		}
+		OGRFeature::DestroyFeature(poFeature);
+		i++;
 	}
 	GDALClose(poDS);
 }
