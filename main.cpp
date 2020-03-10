@@ -8,7 +8,7 @@ int main()
 	read("dane/multipunkty/multipoint_test.shp", "multipoint_test", "id");
 
 	std::cout << std::endl;
-
+	
 	//readMultiPointShapeFile("dane/multipunkty/multipoint_test.shp", "multipoint_test", "id");
 
 	std::vector<std::vector<double>> points;

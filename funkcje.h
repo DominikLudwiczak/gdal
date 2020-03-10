@@ -8,6 +8,8 @@ std::vector<double> readPointShapeFile(OGRGeometry* poGeometry, OGRFeature* poFe
 
 std::vector<double> readMultiPointShapeFile(OGRGeometry* poGeometry, OGRFeature* poFeature);
 
+void writePointOrMultiPointShapeFile(const char* name, const char* layer, const char* field, std::vector<std::vector<double>> points, bool check);
+
 void writePointShapeFile(const char* name, const char* layer, const char* field, std::vector<std::vector<double>> points);
 
 void writeMultiPointShapeFile(const char* name, const char* layer, const char* field, std::vector<std::vector<double>> points);
