@@ -19,9 +19,9 @@ std::vector<std::vector<double>> read(const  char* name, const  char* layer, con
 	OGRFieldDefn oField1(field, OFTInteger64); //typ pola int64 //int string etc -> 32 linia
 
 	std::vector<double> punkt;
+	std::vector<std::vector<double>> punkty;
 
 	result.clear();
-	int i = 0;
 	while ((poFeature = poLayer->GetNextFeature()) != NULL)
 	{
 		for (int iField = 0; iField < poFDefn->GetFieldCount(); iField++)
@@ -51,19 +51,45 @@ std::vector<std::vector<double>> read(const  char* name, const  char* layer, con
 
 		if (poGeometry != NULL)
 		{
-			if (wkbFlatten(poGeometry->getGeometryType()) == wkbPoint) //do punktu
+			if (wkbFlatten(poGeometry->getGeometryType()) == wkbPoint) //z punktu
 			{
-				punkt = readPointShapeFile(poGeometry, poFeature);
+				#if GDAL_VERSION_NUM >= GDAL_COMPUTE_VERSION(2,3,0)
+					OGRPoint * poPoint = poGeometry->toPoint();
+				#else
+					OGRPoint* poPoint = (OGRPoint*)poGeometry;
+				#endif
+				punkt = readPointShapeFile(poPoint);
 				result.push_back(punkt);
 				OGRFeature::DestroyFeature(poFeature);
-				i++;
 			}
-			else if (wkbFlatten(poGeometry->getGeometryType()) == wkbMultiPoint) //do multipunktu
+			else if (wkbFlatten(poGeometry->getGeometryType()) == wkbMultiPoint) //z multipunktu
 			{
-				punkt = readMultiPointShapeFile(poGeometry, poFeature);
+				punkty = readMultiPointShapeFile(poGeometry, poFeature);
+				for (auto row : punkty)
+					result.push_back(row);
 				result.push_back(punkt);
 				OGRFeature::DestroyFeature(poFeature);
-				i++;
+			}
+			else if (wkbFlatten(poGeometry->getGeometryType()) == wkbLineString) //z linii
+			{
+				#if GDAL_VERSION_NUM >= GDAL_COMPUTE_VERSION(2,3,0)
+					OGRLineString * poLineString = poGeometry->toLineString();
+				#else
+					OGRLineString* poLineString = (OGRLineString*)poGeometry;
+				#endif
+				punkty = readLineShapeFile(poLineString);
+				for (auto row : punkty)
+					result.push_back(row);
+				result.push_back(punkt);
+				OGRFeature::DestroyFeature(poFeature);
+			}
+			else if (wkbFlatten(poGeometry->getGeometryType()) == wkbMultiLineString) //z multilinii
+			{
+				punkty = readMultiLineShapeFile(poGeometry, poFeature);
+				for (auto row : punkty)
+					result.push_back(row);
+				result.push_back(punkt);
+				OGRFeature::DestroyFeature(poFeature);
 			}
 			else
 				printf("no point geometry\n");
@@ -79,21 +105,14 @@ std::vector<std::vector<double>> read(const  char* name, const  char* layer, con
 
 
 
-//funkcja odczytuj¹ca punkty
-std::vector<double> readPointShapeFile(OGRGeometry* poGeometry, OGRFeature* poFeature)
+//funkcja odczytuj¹ca punkt
+std::vector<double> readPointShapeFile(OGRPoint* poPoint)
 {
 	std::vector<double> punkt;
-
-	#if GDAL_VERSION_NUM >= GDAL_COMPUTE_VERSION(2,3,0)
-			OGRPoint * poPoint = poGeometry->toPoint();
-	#else
-			OGRPoint* poPoint = (OGRPoint*)poGeometry;
-	#endif
 
 	double x = poPoint->getX();
 	double y = poPoint->getY();
 	
-	printf("%.3f,%3.f\n", x, y);
 	punkt.push_back(x);
 	punkt.push_back(y);
 
@@ -102,10 +121,10 @@ std::vector<double> readPointShapeFile(OGRGeometry* poGeometry, OGRFeature* poFe
 
 
 
-//funkcja odczytuj¹ca multipunkty
-std::vector<double> readMultiPointShapeFile(OGRGeometry* poGeometry, OGRFeature* poFeature)
+//funkcja odczytuj¹ca multipunkt
+std::vector<std::vector<double>> readMultiPointShapeFile(OGRGeometry* poGeometry, OGRFeature* poFeature)
 {
-	std::vector<double> punkt;
+	std::vector<std::vector<double>> punkty;
 
 	printf("%d", poGeometry->getGeometryType());
 	OGRMultiPoint* poMultipoint = (OGRMultiPoint*)poGeometry;
@@ -114,20 +133,55 @@ std::vector<double> readMultiPointShapeFile(OGRGeometry* poGeometry, OGRFeature*
 	{
 		OGRGeometry* poPointGeometry = poMultipoint->getGeometryRef(j);
 		OGRPoint* poPoint = (OGRPoint*)poPointGeometry;
-		double x = poPoint->getX();
-		double y = poPoint->getY();
+		punkty.push_back(readPointShapeFile(poPoint));
+	}
+	return punkty;
+}
+
+
+//funkcja odczytuj¹ca linie
+std::vector<std::vector<double>> readLineShapeFile(OGRLineString* poLineString)
+{
+	std::vector<std::vector<double>> punkty;
+	std::vector<double> punkt;
+	int NumPoints = poLineString->getNumPoints();
+	for (int i = 0; i < NumPoints; i++)
+	{
+		double x = poLineString->getX(i);
+		double y = poLineString->getY(i);
 		punkt.push_back(x);
 		punkt.push_back(y);
-		printf("%d\n", x, y);
+		punkty.push_back(punkt);
+		punkt.clear();
 	}
+	return punkty;
+}
 
-	return punkt;
+
+
+//funkcja odczytuj¹ca multilinie
+std::vector<std::vector<double>> readMultiLineShapeFile(OGRGeometry* poGeometry, OGRFeature* poFeature)
+{
+	std::vector<std::vector<double>> punkty, punkty_linia;
+
+	printf("%d", poGeometry->getGeometryType());
+	OGRMultiLineString* poMultiLineString = (OGRMultiLineString*)poGeometry;
+	int NumberOfGeometries = poMultiLineString->getNumGeometries();
+	for (int j = 0; j < NumberOfGeometries; j++)
+	{
+		OGRGeometry* poLineGeometry = poMultiLineString->getGeometryRef(j);
+		OGRLineString* poLineString = (OGRLineString*)poLineGeometry;
+		punkty_linia = readLineShapeFile(poLineString);
+		for (auto row : punkty_linia)
+			punkty.insert(punkty.end(), row);
+	}
+	return punkty;
 }
 
 
 
 //funkcja rozdzialaj¹ca wszystkie typy do zapisu
-void write(const char* name, const char* layer, const char* field, std::vector<std::vector<double>> points, bool check) {
+void write(const char* name, const char* layer, const char* field, std::vector<std::vector<double>> points, const char* type) {
 	const char* pszDriverName = "ESRI Shapefile";
 	GDALDriver* poDriver;
 	GDALAllRegister();
@@ -155,115 +209,28 @@ void write(const char* name, const char* layer, const char* field, std::vector<s
 		printf("Creating Name field failed.\n");
 		exit(1);
 	}
-	char szName[11];
-	int i = 0;
-	if (check) {
-		while (!feof(stdin) && i < points.size())
-		{
-			OGRFeature* poFeature;
 
-			poFeature = OGRFeature::CreateFeature(poLayer->GetLayerDefn());
-			poFeature->SetField(field, szName);
-
-			OGRPoint pt;
-
-			pt.setX(points.at(i).at(0));
-			pt.setY(points.at(i).at(1));
-
-			poFeature->SetGeometry(&pt);
-
-			if (poLayer->CreateFeature(poFeature) != OGRERR_NONE)
-			{
-				printf("Failed to create feature in shapefile.\n");
-				exit(1);
-			}
-
-			OGRFeature::DestroyFeature(poFeature);
-			i++;
-		}
-	}
-	else {
-		while (!feof(stdin) && i < points.size()) //tu zrobiæ fora
-		{
-			OGRFeature* poFeature;
-
-			poFeature = OGRFeature::CreateFeature(poLayer->GetLayerDefn());
-			poFeature->SetField(field, szName);
-
-			OGRMultiPoint multi_pt;
-			OGRPoint pt;
-
-			pt.setX(points.at(i).at(0));
-			pt.setY(points.at(i).at(1));
-
-			multi_pt.addGeometry(&pt);
-
-			poFeature->SetGeometry(&multi_pt);
-
-			if (poLayer->CreateFeature(poFeature) != OGRERR_NONE)
-			{
-				printf("Failed to create feature in shapefile.\n");
-				exit(1);
-			}
-			OGRFeature::DestroyFeature(poFeature);
-			i++;
-		}
-	}
+	if (type == "points")
+		writePointShapeFile(field, poLayer, points);
+	else if (type == "multipoints")
+		writeMultiPointShapeFile(field, poLayer, points);
+	else
+		printf("Nie okreœlony typ.\n");
 	GDALClose(poDS);
 }
 
 
 
 //funkcja zapisuj¹ca punkty
-void writePointShapeFile(const char* name, const char* layer, const char* field, std::vector<std::vector<double>> points)
+void writePointShapeFile(const char* field, OGRLayer* poLayer, std::vector<std::vector<double>> points)
 {
-	const char* pszDriverName = "ESRI Shapefile";
-	GDALDriver* poDriver;
-
-	GDALAllRegister();
-
-	poDriver = GetGDALDriverManager()->GetDriverByName(pszDriverName);
-	if (poDriver == NULL)
-	{
-		printf("%s driver not available.\n", pszDriverName);
-		exit(1);
-	}
-
-	GDALDataset* poDS;
-
-	poDS = poDriver->Create(name, 0, 0, 0, GDT_Unknown, NULL);
-	if (poDS == NULL)
-	{
-		printf("Creation of output file failed.\n");
-		exit(1);
-	}
-
-	OGRLayer* poLayer;
-
-	poLayer = poDS->CreateLayer(layer, NULL, wkbPoint, NULL);
-	if (poLayer == NULL)
-	{
-		printf("Layer creation failed.\n");
-		exit(1);
-	}
-
-	OGRFieldDefn oField(field, OFTInteger64);
-
-	oField.SetWidth(10);
-
-	if (poLayer->CreateField(&oField) != OGRERR_NONE)
-	{
-		printf("Creating Name field failed.\n");
-		exit(1);
-	}
-	char szName[11];
 	int i = 0;
 	while (!feof(stdin) && i < points.size())
 	{
 		OGRFeature* poFeature;
 
 		poFeature = OGRFeature::CreateFeature(poLayer->GetLayerDefn());
-		poFeature->SetField(field, szName);
+		poFeature->SetField(field, i);
 
 		OGRPoint pt;
 
@@ -281,62 +248,20 @@ void writePointShapeFile(const char* name, const char* layer, const char* field,
 		OGRFeature::DestroyFeature(poFeature);
 		i++;
 	}
-
-	GDALClose(poDS);
 }
 
 
 
 //funkcja zapisuj¹ca multipunkty
-void writeMultiPointShapeFile(const char* name, const char* layer, const char* field, std::vector<std::vector<double>> points)
+void writeMultiPointShapeFile(const char* field, OGRLayer* poLayer, std::vector<std::vector<double>> points)
 {
-	const char* pszDriverName = "ESRI Shapefile";
-	GDALDriver* poDriver;
-
-	GDALAllRegister();
-
-	poDriver = GetGDALDriverManager()->GetDriverByName(pszDriverName);
-	if (poDriver == NULL)
-	{
-		printf("%s driver not available.\n", pszDriverName);
-		exit(1);
-	}
-
-	GDALDataset* poDS;
-
-	poDS = poDriver->Create(name, 0, 0, 0, GDT_Unknown, NULL);
-	if (poDS == NULL)
-	{
-		printf("Creation of output file failed.\n");
-		exit(1);
-	}
-
-	OGRLayer* poLayer;
-
-	poLayer = poDS->CreateLayer(layer, NULL, wkbMultiPoint, NULL);
-	if (poLayer == NULL)
-	{
-		printf("Layer creation failed.\n");
-		exit(1);
-	}
-
-	OGRFieldDefn oField(field, OFTInteger64);
-
-	oField.SetWidth(10);
-
-	if (poLayer->CreateField(&oField) != OGRERR_NONE)
-	{
-		printf("Creating Name field failed.\n");
-		exit(1);
-	}
-	char szName[11];
 	int i = 0;
-	while (!feof(stdin) && i < points.size()) //tu zrobiæ fora
+	while (!feof(stdin) && i < points.size()) //tu zrobiæ for'a
 	{
 		OGRFeature* poFeature;
 
 		poFeature = OGRFeature::CreateFeature(poLayer->GetLayerDefn());
-		poFeature->SetField(field, szName);
+		poFeature->SetField(field, i);
 
 		OGRMultiPoint multi_pt;
 		OGRPoint pt;
@@ -345,7 +270,6 @@ void writeMultiPointShapeFile(const char* name, const char* layer, const char* f
 		pt.setY(points.at(i).at(1));
 
 		multi_pt.addGeometry(&pt);
-
 		poFeature->SetGeometry(&multi_pt);
 
 		if (poLayer->CreateFeature(poFeature) != OGRERR_NONE)
@@ -356,7 +280,4 @@ void writeMultiPointShapeFile(const char* name, const char* layer, const char* f
 		OGRFeature::DestroyFeature(poFeature);
 		i++;
 	}
-	GDALClose(poDS);
 }
-//koniec funckji
-//zapisywanie multipointa

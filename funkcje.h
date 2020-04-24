@@ -4,12 +4,16 @@
 
 std::vector<std::vector<double>> read(const  char* name, const  char* layer, const char* field);
 
-std::vector<double> readPointShapeFile(OGRGeometry* poGeometry, OGRFeature* poFeature);
+std::vector<double> readPointShapeFile(OGRPoint* poPoint);
 
-std::vector<double> readMultiPointShapeFile(OGRGeometry* poGeometry, OGRFeature* poFeature);
+std::vector<std::vector<double>> readMultiPointShapeFile(OGRGeometry* poGeometry, OGRFeature* poFeature);
 
-void write(const char* name, const char* layer, const char* field, std::vector<std::vector<double>> points, bool check);
+std::vector<std::vector<double>> readLineShapeFile(OGRLineString* poLineString);
 
-void writePointShapeFile(const char* name, const char* layer, const char* field, std::vector<std::vector<double>> points);
+std::vector<std::vector<double>> readMultiLineShapeFile(OGRGeometry* poGeometry, OGRFeature* poFeature);
 
-void writeMultiPointShapeFile(const char* name, const char* layer, const char* field, std::vector<std::vector<double>> points);
+void write(const char* name, const char* layer, const char* field, std::vector<std::vector<double>> points, const char* type);
+
+void writePointShapeFile(const char* field, OGRLayer* poLayer, std::vector<std::vector<double>> points);
+
+void writeMultiPointShapeFile(const char* field, OGRLayer* poLayer, std::vector<std::vector<double>> points);
