@@ -24,6 +24,7 @@ int main()
 	punkt.push_back(0.56);
 	points.push_back(punkt);
 	punkt.clear();
+	write("dane/punkty/write/punkty_write.shp", "punkty", "id", points, "points");
 	punkt.push_back(2.69);
 	punkt.push_back(-1.56);
 	points.push_back(punkt);
@@ -34,7 +35,6 @@ int main()
 	punkt.clear();
 
 	//write("dane/multipunkty/write/multipunkty_write.shp", "multipunkty_write", "id", points, "multipoints");
-	//write("dane/punkty/write/punkty_write.shp", "punkty", "id", points, "points");
 
 	return 0;
 }	
