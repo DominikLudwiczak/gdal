@@ -21,19 +21,3 @@ std::vector<OGRPoint*> Points::getAllPoints()
 {
 	return points;
 }
-
-std::vector<OGRPoint*> Points::getPoints(double _x, double _y)
-{
-	std::vector<OGRPoint*> occurrence;
-	for (auto row : points)
-		if (row->getX() == _x && row->getY() == _y)
-			occurrence.push_back(row);
-	return occurrence;
-}
-
-OGRPoint* Points::getPoint(double _x, double _y)
-{
-	for (auto row : points)
-		if (row->getX() == _x && row->getY() == _y)
-			return row;
-}

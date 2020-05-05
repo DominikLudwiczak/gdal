@@ -7,11 +7,18 @@ class Points
 
 public:
 	//konstruktory
-	Points() = default;
+	Points()
+	{
+		
+	}
+
 	Points(OGRPoint* _poPoint)
 	{
 		points.push_back(_poPoint);
 	}
+
+	//destruktor
+	virtual ~Points() {};
 
 	//settery
 	void addPoint(OGRPoint* _point);
@@ -19,7 +26,5 @@ public:
 
 	//gettery
 	std::vector<OGRPoint*> getAllPoints();
-	std::vector<OGRPoint*> getPoints(double _x, double _y);
-	OGRPoint* getPoint(double _x, double _y);
 };
 

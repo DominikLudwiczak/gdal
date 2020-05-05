@@ -2,7 +2,7 @@
 #include "ogrsf_frmts.h"
 #include <vector>
 
-std::vector<std::vector<double>> read(const  char* name, const  char* layer, const char* field);
+void read(const  char* name, const  char* layer, const char* field);
 
 std::vector<double> readPointShapeFile(OGRPoint* poPoint);
 

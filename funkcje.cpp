@@ -1,7 +1,9 @@
 #include "funkcje.h"
+#include "Points.h"
+
 
 //funkcja rozdzielaj¹ca wszystkie typy do odczytu
-std::vector<std::vector<double>> read(const  char* name, const  char* layer, const char* field)
+void read(const  char* name, const  char* layer, const char* field)
 {
 	std::vector<std::vector<double>> result;
 	GDALAllRegister();
@@ -17,9 +19,6 @@ std::vector<std::vector<double>> read(const  char* name, const  char* layer, con
 	poLayer->ResetReading();
 	OGRFeature* poFeature; 
 	OGRFieldDefn oField1(field, OFTInteger64); //typ pola int64 //int string etc -> 32 linia
-
-	std::vector<double> punkt;
-	std::vector<std::vector<double>> punkty;
 
 	result.clear();
 	while ((poFeature = poLayer->GetNextFeature()) != NULL)
@@ -58,8 +57,7 @@ std::vector<std::vector<double>> read(const  char* name, const  char* layer, con
 				#else
 					OGRPoint* poPoint = (OGRPoint*)poGeometry;
 				#endif
-				punkt = readPointShapeFile(poPoint);
-				result.push_back(punkt);
+				punkty.addPoint(poPoint);
 				OGRFeature::DestroyFeature(poFeature);
 			}
 			else if (wkbFlatten(poGeometry->getGeometryType()) == wkbMultiPoint) //z multipunktu
