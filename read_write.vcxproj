@@ -131,6 +131,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="funkcje.cpp" />
+    <ClCompile Include="Geometry.cpp" />
     <ClCompile Include="Lines.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Points.cpp" />
@@ -138,6 +139,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="funkcje.h" />
+    <ClInclude Include="Geometry.h" />
     <ClInclude Include="Lines.h" />
     <ClInclude Include="Points.h" />
     <ClInclude Include="Polygons.h" />

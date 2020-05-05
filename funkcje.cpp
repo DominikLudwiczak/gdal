@@ -1,11 +1,9 @@
 #include "funkcje.h"
 #include "Points.h"
 
-
-//funkcja rozdzielaj¹ca wszystkie typy do odczytu
-void read(const  char* name, const  char* layer, const char* field)
+std::vector<OGRGeometry*> read(const  char* name, const  char* layer, const char* field)
 {
-	std::vector<std::vector<double>> result;
+	std::vector<OGRGeometry*> result;
 	GDALAllRegister();
 	GDALDataset* poDS = static_cast<GDALDataset*>(
 		GDALOpenEx(name, GDAL_OF_VECTOR, NULL, NULL, NULL));
@@ -49,53 +47,9 @@ void read(const  char* name, const  char* layer, const char* field)
 		OGRGeometry* poGeometry = poFeature->GetGeometryRef();
 
 		if (poGeometry != NULL)
-		{
-			if (wkbFlatten(poGeometry->getGeometryType()) == wkbPoint) //z punktu
-			{
-				#if GDAL_VERSION_NUM >= GDAL_COMPUTE_VERSION(2,3,0)
-					OGRPoint * poPoint = poGeometry->toPoint();
-				#else
-					OGRPoint* poPoint = (OGRPoint*)poGeometry;
-				#endif
-				punkty.addPoint(poPoint);
-				OGRFeature::DestroyFeature(poFeature);
-			}
-			else if (wkbFlatten(poGeometry->getGeometryType()) == wkbMultiPoint) //z multipunktu
-			{
-				punkty = readMultiPointShapeFile(poGeometry, poFeature);
-				for (auto row : punkty)
-					result.push_back(row);
-				result.push_back(punkt);
-				OGRFeature::DestroyFeature(poFeature);
-			}
-			else if (wkbFlatten(poGeometry->getGeometryType()) == wkbLineString) //z linii
-			{
-				#if GDAL_VERSION_NUM >= GDAL_COMPUTE_VERSION(2,3,0)
-					OGRLineString * poLineString = poGeometry->toLineString();
-				#else
-					OGRLineString* poLineString = (OGRLineString*)poGeometry;
-				#endif
-				punkty = readLineShapeFile(poLineString);
-				for (auto row : punkty)
-					result.push_back(row);
-				result.push_back(punkt);
-				OGRFeature::DestroyFeature(poFeature);
-			}
-			else if (wkbFlatten(poGeometry->getGeometryType()) == wkbMultiLineString) //z multilinii
-			{
-				punkty = readMultiLineShapeFile(poGeometry, poFeature);
-				for (auto row : punkty)
-					result.push_back(row);
-				result.push_back(punkt);
-				OGRFeature::DestroyFeature(poFeature);
-			}
-			else
-				printf("no point geometry\n");
-		}
+			result.push_back(poGeometry);
 		else
 			printf("NULL\n");
-
-		punkt.clear();
 	}
 	GDALClose(poDS);
 	return result;

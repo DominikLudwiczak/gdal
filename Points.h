@@ -1,16 +1,14 @@
 #pragma once
 #include "ogrsf_frmts.h"
 #include <vector>
-class Points
+#include "Geometry.h"
+class Points : public Geometry
 {
 	std::vector<OGRPoint*> points;
 
 public:
 	//konstruktory
-	Points()
-	{
-		
-	}
+	Points() : Geometry() {}
 
 	Points(OGRPoint* _poPoint)
 	{
