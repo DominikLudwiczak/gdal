@@ -14,12 +14,14 @@ int main()
 		geom = new Points();
 		for (auto row : geometry)
 			geom->addGeometry(row);
-
-		std::vector<OGRPoint*> points = geom->getAllPoints();
-		std::cout << std::endl;
-		for (auto row : points)
-			std::cout << row->getX() << " | " << row->getY() << std::endl;
 	}
+	else
+		geom = new Points();
+
+	std::vector<OGRPoint*> points = geom->getAllPoints();
+	std::cout << std::endl;
+	for (auto row : points)
+		std::cout << row->getX() << " | " << row->getY() << std::endl;
 	geometry.clear();
 
 
