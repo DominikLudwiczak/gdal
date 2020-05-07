@@ -1,19 +1,14 @@
 #include "Points.h"
+#include <iostream>
 //settery
-void Points::addPoint(OGRPoint* _point)
+void Points::addGeometry(OGRGeometry* _geometry)
 {
-	points.push_back(_point);
-}
-
-void Points::deletePoints(double _x, double _y)
-{
-	std::vector<OGRPoint*> occurrence;
-	std::vector<OGRPoint*>::iterator it = occurrence.begin();
-	while (it != occurrence.end())
-	{
-		occurrence.erase(it);
-		it++;
-	}
+	#if GDAL_VERSION_NUM >= GDAL_COMPUTE_VERSION(2,3,0)
+		OGRPoint* poPoint = _geometry->toPoint();
+	#else
+		OGRPoint* poPoint = (OGRPoint*)_geometry;
+	#endif
+	points.push_back(poPoint);
 }
 
 //gettery

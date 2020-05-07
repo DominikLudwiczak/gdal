@@ -1,6 +1,8 @@
 #pragma once
 #include "ogrsf_frmts.h"
 #include <vector>
+#include "Geometry.h"
+#include "Points.h"
 
 std::vector<OGRGeometry*> read(const  char* name, const  char* layer, const char* field);
 

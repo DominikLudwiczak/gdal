@@ -57,6 +57,11 @@ std::vector<OGRGeometry*> read(const  char* name, const  char* layer, const char
 
 
 
+
+
+
+//ZOSTAWIÆ!!!!!!!!!!!!!
+
 //funkcja odczytuj¹ca punkt
 std::vector<double> readPointShapeFile(OGRPoint* poPoint)
 {

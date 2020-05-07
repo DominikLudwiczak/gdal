@@ -1,38 +1,27 @@
 #include <iostream>
 #include "funkcje.h"
+#include "Geometry.h"
+#include "Points.h"
 
 int main()
 {
-	//std::vector<std::vector<double>> punkty = read("dane/punkty/point_test.shp", "point_test", "id");
-	//std::vector<std::vector<double>> punkty = read("dane/multipunkty/multipoint_test.shp", "multipoint_test", "id");
-	std::vector<std::vector<double>> punkty = read("dane/linie/linie_test.shp", "linie_test", "id");
-	//std::vector<std::vector<double>> punkty = read("dane/multilinie/multilinie_test.shp", "multilinie_test", "id");
+	std::vector<OGRGeometry*> geometry = read("dane/punkty/point_test.shp", "point_test", "id");
+	
+	Geometry* geom;
 
-	std::cout << std::endl << std::endl;
-	for (auto row : punkty)
+	if (wkbFlatten(geometry.at(0)->getGeometryType()) == wkbPoint)
 	{
-		for (auto wiersz : row)
-			std::cout << wiersz << " ";
+		geom = new Points();
+		for (auto row : geometry)
+			geom->addGeometry(row);
+
+		std::vector<OGRPoint*> points = geom->getAllPoints();
 		std::cout << std::endl;
+		for (auto row : points)
+			std::cout << row->getX() << " | " << row->getY() << std::endl;
 	}
+	geometry.clear();
 
-	std::cout << std::endl;
-
-	std::vector<std::vector<double>> points;
-	std::vector<double>punkt;
-	punkt.push_back(1.69);
-	punkt.push_back(0.56);
-	points.push_back(punkt);
-	punkt.clear();
-	write("dane/punkty/write/punkty_write.shp", "punkty", "id", points, "points");
-	punkt.push_back(2.69);
-	punkt.push_back(-1.56);
-	points.push_back(punkt);
-	punkt.clear();
-	punkt.push_back(1.69);
-	punkt.push_back(0.56);
-	points.push_back(punkt);
-	punkt.clear();
 
 	//write("dane/multipunkty/write/multipunkty_write.shp", "multipunkty_write", "id", points, "multipoints");
 

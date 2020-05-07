@@ -3,25 +3,13 @@
 #include <vector>
 class Geometry
 {
-	std::vector<OGRGeometry*> geometry;
 public:
-	//konstruktory
-	Geometry() {}
-
-	Geometry(OGRGeometry* _geometry)
-	{
-		geometry.push_back(_geometry);
-	}
-
-	//destruktor
-	virtual ~Geometry() {}
-
 	//settery
-	void addGeometry(OGRGeometry* _geometry);
+	virtual void addGeometry(OGRGeometry* _geometry) = 0;
 
 	//gettery
-	std::vector<OGRGeometry*>getAllGeometry();
+	virtual std::vector<OGRPoint*>getAllPoints() = 0;
 
 	//prze³adowanie operatora indeksowania
-	OGRGeometry*& operator[](int i);
+	//virtual OGRGeometry*& operator[](int i) = 0;
 };

@@ -8,7 +8,7 @@ class Points : public Geometry
 
 public:
 	//konstruktory
-	Points() : Geometry() {}
+	Points(){}
 
 	Points(OGRPoint* _poPoint)
 	{
@@ -19,10 +19,8 @@ public:
 	virtual ~Points() {};
 
 	//settery
-	void addPoint(OGRPoint* _point);
-	void deletePoints(double _x, double _y);
+	virtual void addGeometry(OGRGeometry* _geometry);
 
 	//gettery
-	std::vector<OGRPoint*> getAllPoints();
+	virtual std::vector<OGRPoint*> getAllPoints();
 };
-
