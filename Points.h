@@ -23,4 +23,8 @@ public:
 
 	//gettery
 	virtual std::vector<OGRPoint*> getAllPoints();
+
+	//operator prze³adowania indeksuj¹cego[]
+	OGRPoint* operator[](int i);
+
 };

@@ -16,3 +16,13 @@ std::vector<OGRPoint*> Points::getAllPoints()
 {
 	return points;
 }
+
+OGRPoint* Points::operator[](int i) {
+	int x = 0;
+	for (auto obj : this->points) {
+		if (x == i) {
+			return obj;
+		}
+		x++;
+	}
+}

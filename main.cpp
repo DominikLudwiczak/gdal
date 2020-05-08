@@ -14,7 +14,8 @@ int main()
 		geom = new Points();
 		for (auto row : geometry)
 			geom->addGeometry(row);
-	}
+			std::cout << geom[0];
+	}	
 	else
 		geom = new Points();
 
