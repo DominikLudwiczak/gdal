@@ -132,11 +132,12 @@
   <ItemGroup>
     <ClCompile Include="funkcje.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="MultiPoints.cpp" />
     <ClCompile Include="Points.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="funkcje.h" />
-    <ClInclude Include="Geometry.h" />
+    <ClInclude Include="MultiPoints.h" />
     <ClInclude Include="Points.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

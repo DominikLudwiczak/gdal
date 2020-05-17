@@ -1,8 +1,8 @@
 #pragma once
 #include "ogrsf_frmts.h"
 #include <vector>
-#include "Geometry.h"
-class Points : public Geometry
+
+class Points
 {
 	std::vector<OGRPoint*> points;
 
@@ -23,8 +23,5 @@ public:
 
 	//gettery
 	virtual std::vector<OGRPoint*> getAllPoints();
-
-	//operator prze³adowania indeksuj¹cego[]
-	OGRPoint* operator[](int i);
-
+	OGRPoint* getPoint(int i);
 };

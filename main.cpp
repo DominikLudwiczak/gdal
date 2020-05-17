@@ -1,31 +1,33 @@
 #include <iostream>
 #include "funkcje.h"
-#include "Geometry.h"
 #include "Points.h"
+#include "MultiPoints.h"
 
 int main()
 {
+	Points* points = new Points();
+	MultiPoints* multiPoints = new MultiPoints();
+
 	std::vector<OGRGeometry*> geometry = read("dane/punkty/point_test.shp", "point_test", "id");
-	
-	Geometry* geom;
+	division(*points, *multiPoints, geometry);
 
-	if (wkbFlatten(geometry.at(0)->getGeometryType()) == wkbPoint)
-	{
-		geom = new Points();
-		for (auto row : geometry)
-			geom->addGeometry(row);
-			std::cout << geom[0];
-	}	
-	else
-		geom = new Points();
-
-	std::vector<OGRPoint*> points = geom->getAllPoints();
 	std::cout << std::endl;
-	for (auto row : points)
+
+	std::vector<OGRPoint*> point = points->getAllPoints();
+	for (auto row : point)
 		std::cout << row->getX() << " | " << row->getY() << std::endl;
-	geometry.clear();
 
+	//sprawdzenie czy geometrie dopisuj¹ siê do jednego obiektu
 
+	geometry = read("dane/punkty/point_test.shp", "point_test", "id");
+	division(*points, *multiPoints, geometry);
+
+	std::cout << std::endl;
+
+	point = points->getAllPoints();
+	for (auto row : point)
+		std::cout << row->getX() << " | " << row->getY() << std::endl;
+	
 	//write("dane/multipunkty/write/multipunkty_write.shp", "multipunkty_write", "id", points, "multipoints");
 
 	return 0;

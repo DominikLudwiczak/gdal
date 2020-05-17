@@ -58,6 +58,17 @@ std::vector<OGRGeometry*> read(const  char* name, const  char* layer, const char
 
 
 
+void division(Points& points, MultiPoints& multiPoints, std::vector<OGRGeometry*> geometry)
+{
+	if (wkbFlatten(geometry.at(0)->getGeometryType()) == wkbPoint)
+		for (auto row : geometry)
+			points.addGeometry(row);
+	else if (wkbFlatten(geometry.at(0)->getGeometryType()) == wkbMultiPoint)
+		for (auto row : geometry)
+			multiPoints.addGeometry(row);
+}
+
+
 
 
 //ZOSTAWIÆ!!!!!!!!!!!!!
