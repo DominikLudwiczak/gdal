@@ -20,6 +20,7 @@ public:
 
 	//settery
 	virtual void addGeometry(OGRGeometry* _geometry);
+	virtual void writeGeometryToShape();
 
 	//gettery
 	virtual std::vector<OGRPoint*> getAllPoints();
