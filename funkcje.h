@@ -1,7 +1,6 @@
 #pragma once
 #include "ogrsf_frmts.h"
 #include <vector>
-#include "Geometry.h"
 #include "Points.h"
 #include "MultiPoints.h"
 
